@@ -1,0 +1,1 @@
+{"version":3,"file":"KnextPagination.d.ts","sourceRoot":"","sources":["../src/KnextPagination.ts"],"names":[],"mappings":"AAAA,qBAAa,eAAe;IACL,IAAI,EAAE,MAAM;IAAS,QAAQ,EAAE,MAAM;IAAS,SAAS,EAAE,MAAM;gBAA/D,IAAI,EAAE,MAAM,EAAS,QAAQ,EAAE,MAAM,EAAS,SAAS,EAAE,MAAM;CACrF"}
