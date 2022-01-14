@@ -1,4 +1,5 @@
 import { Knex } from "knex";
+import { Filter } from "./KnextFilter";
 import { KnextResult } from "./KnextResult";
 export declare class KnexNext<T> {
     query: Knex.QueryBuilder<T>;
@@ -7,7 +8,7 @@ export declare class KnexNext<T> {
     private hasPage;
     constructor(query: Knex.QueryBuilder<T>);
     search(text: string, ...fields: (keyof T)[]): this;
-    filter(filter: (query: Knex.QueryBuilder<T>) => void): this;
+    filter(filter: Filter<T>): this;
     paginate(page: number, pageSize: number): this;
     retrieve(): Promise<KnextResult<T>>;
 }

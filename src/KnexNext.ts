@@ -1,6 +1,8 @@
 import { Knex } from "knex";
 import { SqlString } from "./implements/SqlString";
+import { Filter, KnextFilter } from "./KnextFilter";
 import { KnextResult } from "./KnextResult";
+import { formatSqlString } from "./Utils";
 
 export class KnexNext<T>{
     private pageIndex: number | undefined;
@@ -9,7 +11,7 @@ export class KnexNext<T>{
     constructor(public query: Knex.QueryBuilder<T>) { }
     search(text: string, ...fields: (keyof T)[]) {
         // sql injection security
-        text = text.replace(/[^\w\d]/g, '\\$&');
+        text = formatSqlString(text);
 
         this.query = this.query.where(function () {
             for (let field of fields) {
@@ -18,8 +20,8 @@ export class KnexNext<T>{
         });
         return this;
     }
-    filter(filter: (query: Knex.QueryBuilder<T>) => void) {
-        filter(this.query);
+    filter(filter: Filter<T>) {
+        this.query = KnextFilter(this.query, filter)
         return this;
     }
     paginate(page: number, pageSize: number) {
@@ -57,6 +59,5 @@ export class KnexNext<T>{
             }) || null;
         }
         return new KnextResult<T>(records, this.hasPage ? total : (records?.length || 0), !isError, error, this.hasPage, this.pageIndex, this.pageSize);
-
     }
 }
