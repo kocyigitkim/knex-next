@@ -9,11 +9,15 @@
   },
   "name": "knex-next",
   "description": "Powerful functions for knex",
-  "version": "1.0.1",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
+  "version": "1.0.9",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "files": [
+    "build/**/*.*"
+  ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepublish": "tsc"
   },
   "repository": {
     "type": "git",
