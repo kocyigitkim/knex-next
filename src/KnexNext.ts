@@ -1,5 +1,6 @@
 import { Knex } from "knex";
 import { SqlString } from "./implements/SqlString";
+import { KnexNextRequest } from "./KnexNextRequest";
 import { Filter, KnextFilter } from "./KnextFilter";
 import { KnextResult } from "./KnextResult";
 import { formatSqlString } from "./Utils";
@@ -10,6 +11,7 @@ export class KnexNext<T>{
     private hasPage: boolean = false;
     constructor(public query: Knex.QueryBuilder<T>) { }
     search(text: string, ...fields: (keyof T)[]) {
+        if(!text) return this;
         // sql injection security
         text = formatSqlString(text);
 
@@ -28,6 +30,22 @@ export class KnexNext<T>{
         this.pageIndex = page;
         this.pageSize = pageSize;
         this.hasPage = true;
+        return this;
+    }
+    sort(column: keyof T, order: 'asc' | 'desc') {
+        this.query = this.query.orderBy(column as string, order);
+        return this;
+    }
+    build(request: KnexNextRequest<T>) {
+        if (request.filter) {
+            this.filter(request.filter);
+        }
+        if(request.pagination){
+            this.paginate(request.pagination.page, request.pagination.pageSize);
+        }
+        if (request.sort) {
+            this.sort(request.sort.column, request.sort.order);
+        }
         return this;
     }
     async retrieve(): Promise<KnextResult<T>> {
@@ -61,3 +79,4 @@ export class KnexNext<T>{
         return new KnextResult<T>(records, this.hasPage ? total : (records?.length || 0), !isError, error, this.hasPage, this.pageIndex, this.pageSize);
     }
 }
+
