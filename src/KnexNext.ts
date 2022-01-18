@@ -10,8 +10,8 @@ export class KnexNext<T>{
     private pageSize: number | undefined;
     private hasPage: boolean = false;
     constructor(public query: Knex.QueryBuilder<T>) { }
-    search(text: string, ...fields: (keyof T)[]) {
-        if(!text) return this;
+    search(text?: string | undefined, ...fields: (keyof T)[]) {
+        if (!text) return this;
         // sql injection security
         text = formatSqlString(text);
 
@@ -40,7 +40,7 @@ export class KnexNext<T>{
         if (request.filter) {
             this.filter(request.filter);
         }
-        if(request.pagination){
+        if (request.pagination) {
             this.paginate(request.pagination.page, request.pagination.pageSize);
         }
         if (request.sort) {
