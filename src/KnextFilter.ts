@@ -15,62 +15,104 @@ export interface FilterCondition<T> {
     "$lte"?: Filter<T>,
     "$in"?: Filter<T>,
     "$like"?: Filter<T>,
-    "$between"?: Filter<T>,
+    "$between"?: any[],
     "$contains"?: Filter<T>,
+    "$range": any[]
 }
 
-export function KnextFilter<T>(query: Knex.QueryBuilder<T>, filter: Filter<T>) {
+export function KnextFilter<T>(query: Knex.QueryBuilder<T>, filter: Filter<T> | any[], fieldName: string = null) {
     for (var f in filter) {
         if (f.startsWith("$")) {
-            query = KnextCondition(query, f.substring(1), filter[f]);
+            var operator = f.substring(1);
+            if (operator == "and" || operator == "or") {
+                query = KnextCondition(query, null, operator, filter[f]);
+            }
+            else {
+                query = KnextCondition(query, fieldName, f.substring(1), filter[f]);
+            }
         }
         else {
-            query = query.where(f, filter[f]);
+            var filterV = filter[f];
+            if (typeof filterV === 'object') {
+                var operatorName = Object.keys(filterV)[0];
+                var condition = filterV[operatorName];
+                if (operatorName.startsWith("$")) operatorName = operatorName.substring(1);
+                query = KnextCondition(query, f, operatorName, condition);
+            }
+            else {
+                query = query.where(f, filterV);
+            }
         }
+        return query;
     }
-    return query;
 }
 
-function KnextCondition<T>(query: Knex.QueryBuilder<T>, operator: string, condition: Filter<T>): Knex.QueryBuilder<T, any> {
-    var firstKey = Object.keys(condition)[0];
+function KnextCondition<T>(query: Knex.QueryBuilder<T>, fieldName: string, operator: string, condition: Filter<T> | any[]): Knex.QueryBuilder<T, any> {
     switch (operator) {
         case "and":
             return query.andWhere(function () {
-                KnextFilter(this, condition);
+                if (Array.isArray(condition)) {
+                    for (var i = 0; i < condition.length; i++) {
+                        var c = condition[i];
+                        KnextFilter(this, c, fieldName);
+                    }
+                }
             });
         case "or":
             return query.orWhere(function () {
-                KnextFilter(this, condition);
+                if (Array.isArray(condition)) {
+                    for (var i = 0; i < condition.length; i++) {
+                        var c = condition[i];
+                        KnextFilter(this, c, fieldName);
+                    }
+                }
             });
         case "not":
             return query.whereNot(function () {
                 KnextFilter(this, condition);
             });
         case "eq":
-            return query.where(function () {
-                KnextFilter(this, condition);
-            });
+            return query.where(fieldName, "=", condition as any);
         case "ne":
-            return query.whereNot(function () {
-                KnextFilter(this, condition);
-            });
+            return query.whereNot(fieldName, "<>", condition as any);
         case "gt":
-            return query.where(firstKey, ">", condition[firstKey]);
+            return query.where(fieldName, ">", condition as any);
         case "gte":
-            return query.where(firstKey, ">=", condition[firstKey]);
+            return query.where(fieldName, ">=", condition as any);
         case "lt":
-            return query.where(firstKey, "<", condition[firstKey]);
+            return query.where(fieldName, "<", condition as any);
         case "lte":
-            return query.where(firstKey, "<=", condition[firstKey]);
+            return query.where(fieldName, "<=", condition as any);
         case "in":
-            return query.whereIn(firstKey, condition[firstKey]);
+            return query.whereIn(fieldName, condition as any);
         case "like":
-            return query.where(firstKey, "like", `%${formatSqlString(condition[firstKey])}%`);
+            return query.where(fieldName, "like", `%${formatSqlString(condition as any)}%`);
+        case "range":
+            {
+                var rangeValue = condition;
+                if (Array.isArray(rangeValue)) {
+                    var begin = rangeValue[0];
+                    var end = rangeValue[1];
+                    if (begin && end) {
+                        return query.where(fieldName, ">", begin).where(fieldName, "<", end);
+                    }
+                    else if (begin && !end) {
+                        return query.where(fieldName, ">", begin);
+                    }
+                    else if (!begin && end) {
+                        return query.where(fieldName, "<", end);
+                    }
+                    else {
+                        return query;
+                    }
+                }
+                return null;
+            }
         case "between":
-            return query.whereBetween(firstKey, condition[firstKey]);
+            return query.whereBetween(fieldName, condition as any);
         case "contains":
             return query.where(function () {
-                this.where(firstKey, "like", `%${formatSqlString(condition[firstKey])}%`);
+                this.where(fieldName, "like", `%${formatSqlString(condition as any)}%`);
             });
         default:
             throw new Error(`Unknown operator: ${operator}`);
