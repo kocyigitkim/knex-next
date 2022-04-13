@@ -1,3 +1,5 @@
 export function formatSqlString(str: string): string {
-    return str.replace(/[^\w\d]/g, '\\$&');
+    var v = str.replace(/[^\w\d]/g, '\\$&');
+    v = v.replace("\\ ", " ");
+    return v;
 }
