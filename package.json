@@ -9,7 +9,7 @@
   },
   "name": "knex-next",
   "description": "Powerful functions for knex",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "main": "build/index.js",
   
   "types": "build/index.d.ts",

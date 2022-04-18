@@ -43,8 +43,8 @@ export function KnextFilter<T>(query: Knex.QueryBuilder<T>, filter: Filter<T> | 
                 query = query.where(f, filterV);
             }
         }
-        return query;
     }
+    return query;
 }
 
 function KnextCondition<T>(query: Knex.QueryBuilder<T>, fieldName: string, operator: string, condition: Filter<T> | any[]): Knex.QueryBuilder<T, any> {
