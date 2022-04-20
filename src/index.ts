@@ -1,6 +1,5 @@
 import { Knex } from "knex";
 import { KnexNext } from "./KnexNext";
-export { SqlString } from "./implements/SqlString";
 export { KnexNextRequest } from "./KnexNextRequest";
 
 

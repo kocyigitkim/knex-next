@@ -1,5 +1,4 @@
 import { Knex } from "knex";
-import { SqlString } from "./implements/SqlString";
 import { KnexNextRequest } from "./KnexNextRequest";
 import { Filter, KnextFilter } from "./KnextFilter";
 import { KnextResult } from "./KnextResult";
