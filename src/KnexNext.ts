@@ -8,8 +8,11 @@ export class KnexNext<T>{
     private pageIndex: number | undefined;
     private pageSize: number | undefined;
     private hasPage: boolean = false;
-    constructor(public query: Knex.QueryBuilder<T>) { }
-    search(text?: string | undefined, ...fields: (keyof T)[]) {
+    private query: any;
+    constructor(query: T) {
+        this.query = query as any;
+    }
+    search(text?: string | undefined, ...fields: string[]) {
         if (!text) return this;
         // sql injection security
         text = formatSqlString(text);
@@ -47,7 +50,7 @@ export class KnexNext<T>{
         }
         return this;
     }
-    async retrieve(): Promise<KnextResult<T>> {
+    async retrieve(): Promise<KnextResult<any>> {
         var isError = false;
         var error: Error;
         var query = this.query.clone();
@@ -75,7 +78,7 @@ export class KnexNext<T>{
                 error = err;
             }) || null;
         }
-        return new KnextResult<T>(records, this.hasPage ? total : (records?.length || 0), !isError, error, this.hasPage, this.pageIndex, this.pageSize);
+        return new KnextResult<any>(records, this.hasPage ? total : (records?.length || 0), !isError, error, this.hasPage, this.pageIndex, this.pageSize);
     }
 }
 
