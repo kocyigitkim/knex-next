@@ -17,7 +17,8 @@ export interface FilterCondition<T> {
     "$like"?: Filter<T>,
     "$between"?: any[],
     "$contains"?: Filter<T>,
-    "$range": any[]
+    "$range": any[],
+    "$rangeExact": any[]
 }
 
 export function KnextFilter<T>(query: Knex.QueryBuilder<T>, filter: Filter<T> | any[], fieldName: string = null) {
@@ -101,6 +102,27 @@ function KnextCondition<T>(query: Knex.QueryBuilder<T>, fieldName: string, opera
                     }
                     else if (!begin && end) {
                         return query.where(fieldName, "<", end);
+                    }
+                    else {
+                        return query;
+                    }
+                }
+                return null;
+            }
+        case "rangeExact":
+            {
+                var rangeValue = condition;
+                if (Array.isArray(rangeValue)) {
+                    var begin = rangeValue[0];
+                    var end = rangeValue[1];
+                    if (begin && end) {
+                        return query.where(fieldName, ">=", begin).where(fieldName, "<=", end);
+                    }
+                    else if (begin && !end) {
+                        return query.where(fieldName, ">=", begin);
+                    }
+                    else if (!begin && end) {
+                        return query.where(fieldName, "<=", end);
                     }
                     else {
                         return query;
